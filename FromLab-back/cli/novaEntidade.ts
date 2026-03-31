@@ -7,46 +7,47 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function cli() {
-    const entidade = await inquirer.prompt([
-        {
-            type: "input",
-            name: "nome",
-            message: "Digite o nome da entidade: "
-        }
-    ]);
+async function novaEntidade() {
+    const args = process.argv.slice(2);
+    const nomeArg = args[0];
 
-    if(entidade.nome == null) {
-        return console.log("Entrada inválida");
+    const nomeLimpo = nomeArg?.trim();
+
+    if (!nomeLimpo) {
+        return console.log("❌ Informe o nome da entidade. Ex: npm run nova-entidade User");
     }
 
-    const baseName = entidade.nome.toLowerCase();
+    if (!/^[A-Za-z]+$/.test(nomeLimpo)) {
+        return console.log("❌ Nome inválido. Use apenas letras.");
+    }
+
+    const baseName = nomeLimpo.toLowerCase();
 
     const paths = {
-        model: path.join(__dirname, 'src/routes', `${baseName}.routes.ts`),
-        controller: path.join(__dirname, 'src/controllers', `${baseName}.controller.ts`),
-        service: path.join(__dirname, 'src/services', `${baseName}.service.ts`)
+        model: path.join(__dirname, '../src/routes', `${baseName}.routes.ts`),
+        controller: path.join(__dirname, '../src/controllers', `${baseName}.controller.ts`),
+        service: path.join(__dirname, '../src/services', `${baseName}.service.ts`)
     };
 
     fs.writeFileSync(paths.model, `
 import { Router } from "express";
-import { ${entidade.nome}Controller } from "../controllers/${baseName}.controller";
+import { ${nomeLimpo}Controller } from "../controllers/${baseName}.controller";
             
 const ${baseName}Router = Router();
             
-//${baseName}Router.post("/", ${entidade.nome}Controller.createUser);
+//${baseName}Router.post("/", ${nomeLimpo}Controller.createUser);
             
 export default ${baseName}Router;
     `);
     fs.writeFileSync(paths.controller, `
 import { Request, Response } from "express";
 import { HttpError } from "../core/httpError";
-import { ${entidade.nome}Service } from "../services/${baseName}.service";
+import { ${nomeLimpo}Service } from "../services/${baseName}.service";
         
-export class ${entidade.nome}Controller {
+export class ${nomeLimpo}Controller {
     static async create(req: Request, res: Response) {
         try {
-            await ${entidade.nome}Service.create(req.body);
+            await ${nomeLimpo}Service.create(req.body);
             return res.status(201).json({ message: "created successfully" });
         } catch (err: HttpError | any) {
             console.error("Error:", err);
@@ -59,7 +60,7 @@ export class ${entidade.nome}Controller {
 import { prisma } from "../../lib/prisma";
 import { HttpError } from "../core/httpError";
 
-export class ${entidade.nome}Service {
+export class ${nomeLimpo}Service {
     static async create(body: any) {
         //const { name, email, password } = body;
 
@@ -79,8 +80,8 @@ export class ${entidade.nome}Service {
 }
     `);
 
-    console.log(`Entidade ${entidade.nome} criada com sucesso!`);
+    console.log(`Entidade ${nomeLimpo} criada com sucesso!`);
 
 }
 
-cli();
+novaEntidade();

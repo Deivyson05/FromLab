@@ -30,7 +30,8 @@
         "start": "tsx src/index.ts",
         "dev": "tsx watch src/index.ts",
         "build": "tsc",
-        "nova-entidade": "tsx cli.ts"
+        "nova-entidade": "tsx cli/novaEntidade.ts",
+        "excluir-entidade": "tsx cli/excluirEntidade.ts"
     },
     "devDependencies": {
         "@types/cors": "^2.8.19",
